@@ -1,0 +1,12 @@
+{
+  "name": "video-streamer",
+  "version": "1.0.0",
+  "description": "hope to complete",
+  "license": "ISC",
+  "author": "meee",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
