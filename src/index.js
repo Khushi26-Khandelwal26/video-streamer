@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import express from "express";
 import connectDB from "./db/index.js";
+import {app} from "./app.js"
 //database se jb bhi connect kro toh async await lagao..kyunki database
 //se aane me time lgta h aur try and catch lagao kyunki error aane ki chances
 //hote h 
