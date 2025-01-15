@@ -1,6 +1,6 @@
 import mongoose,{Schema} from "mongoose";
-import { JsonWebTokenError } from "jsonwebtoken";
-import bcrypt from bcrypt;
+import JsonWebToken from "jsonwebtoken"
+import bcrypt from "bcrypt";
 const userSchema = new Schema({
     userName : {
         type : String,
@@ -53,7 +53,7 @@ const userSchema = new Schema({
 //pre is a hook(mongoose middleware),arrow function me this ka context nhi milta
 userSchema.pre("save",async function(next){
     if(!this.isModified("password")) return next
-    this.password = bcrypt.hash(this.password, 10)
+    this.password = await bcrypt.hash(this.password, 10)
     next()
 })
 //is tareeke se method apne schema me inject kr skate h
