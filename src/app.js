@@ -11,6 +11,9 @@ app.use(cors({
  app.use(express.urlencoded({extended : true,limit : "16kb"}))
  app.use(express.static("public"))// to store files..in that public folder
 
- app.use(cookieParser())
+app.use(cookieParser())
 
+//Routes
+import userRouter from "./routes/user.routes.js"
+app.use('/api/v1/users',userRouter)
 export {app}
