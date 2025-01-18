@@ -166,7 +166,7 @@ const refreshAccessToken = asyncHandler(async(req,res) =>{
         }
         const decodedToken = jwt.verify(incomingRefreshToken , process.env.REFRESH_TOKEN_SECRET)
         
-        const user = await User.findById(decodedToken?._id)
+        const user = await User.findById(decodedToken?._id).select("-password")
         if(!user){
             throw new ApiError(401,"Invalid refresh Token")
         }
@@ -191,4 +191,108 @@ const refreshAccessToken = asyncHandler(async(req,res) =>{
     }
 
 })
-export {registerUser,loginUser,logoutUser,refreshAccessToken}
+
+const changeCurrentPassword = asyncHandler( async(req,res) =>{
+    const {OldPassword , NewPassword, ConfirmPassword} = req.body
+    if(NewPassword !== ConfirmPassword){
+        throw new ApiError(401, "New Password and Confirm Password don't match")
+    }
+    //authmiddleware se user id nikal skte h..read verifyJWT code
+    const user = await User.findById(req.user?._id)
+    const isPasswordCorrect = isPasswordCorrect(OldPassword)
+    if(!isPasswordCorrect){
+        throw new ApiError(400, "Invalid Old Password")
+    }
+
+    user.password = NewPassword
+    await user.save({validateBeforeSave : false})
+    return res
+    .status(200)
+    .json(new ApiResponse(200,{},"Password Changed Successfully"))
+})
+
+const getCurrentUser = asyncHandler(async (req,res) => {
+    return res
+    .status(200)
+    .json(new ApiResponse(200, {req.user}, "Take the user"))
+})
+//files update ka fn alg rakha karo
+const updateAccountDetails = asyncHandler(async(req,res) =>{
+    const {fullName,email} = req.body
+    if(!fullName || !email){
+        throw new ApiError(400, "Fullname and email required")
+    }
+    const user = await User.findbyIdAndUpdate(req.user?._id,
+        {
+            $set : {
+                fullName : fullName,
+                email : email
+            }
+        },
+        {new : true} //update hone ke baad return hoti h new : true se
+    ).select("-password")
+    return res
+    .status(200)
+    .json(new ApiResponse( 200, {user}, "Account details updated"))
+
+})
+
+const updateUserAvatar = asyncHandler(async(req,res) => {
+    const avatarFilePath = req.file?.path
+    if(!avatarFilePath) {
+        throw new ApiError(400, "Avatar file is required")
+    }
+
+    const avatar  = await uploadOnCloudinary(avatarFilePath)
+    if(!avatar.url){
+        throw new ApiError(400,"Error while uploading File")
+    }
+    await User.findByIdAndUpdate(req.user?._id,
+        {
+            $set : {
+                avatar : avatar.url
+            }
+        },
+        {new : true}).select("-password")
+    return res
+    .status(200)
+    .json(new ApiResponse(200 , {avatar.url} , "Updated Avatar!"))
+        
+})
+
+const updateCoverImage = asyncHandler(async(req,res) => {
+    const coverFilePath = req.file?.path
+    if(!coverFilePath) {
+        throw new ApiError(400, "CoverImage is required")
+    }
+
+    const CoverImage  = await uploadOnCloudinary(coverFilePath)
+    if(!CoverImage.url){
+        throw new ApiError(400,"Error while uploading cover File")
+    }
+    await User.findByIdAndUpdate(req.user?._id,
+        {
+            $set : {
+                coverImage : CoverImage.url
+            }
+        },
+        {new : true}).select("-password")
+    return res
+    .status(200)
+    .json(new ApiResponse(200 , CoverImage.url , "Updated Cover Image!"))
+        
+})
+
+
+
+export 
+{registerUser,
+loginUser,
+logoutUser,
+refreshAccessToken,
+changeCurrentPassword,
+getCurrentUser,
+updateAccountDetails,
+updateUserAvatar,
+updateCoverImage
+}

@@ -1,4 +1,4 @@
-# auth middleware
+# Auth middleware
 This code defines an `asyncHandler` middleware function named `verifyJWT` that verifies a JSON Web Token (JWT) for authentication purposes. Here's a detailed explanation, line by line:
 
 ---
