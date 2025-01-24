@@ -10,6 +10,8 @@ import {getCurrentUser} from "../controllers/user.controller.js"
 import {updateAccountDetails} from "../controllers/user.controller.js"
 import {updateUserAvatar} from "../controllers/user.controller.js"
 import {updateCoverImage} from "../controllers/user.controller.js"
+import {getUserChannelProfile} from "../controllers/user.controller.js"
+import {getWatchHistory} from "../controllers/user.controller.js"
 
 
 //we use middleware before going to userRegister function...upload middleware

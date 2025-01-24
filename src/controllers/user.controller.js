@@ -134,9 +134,9 @@ const logoutUser = asyncHandler(async (req,res)=>{
     //toh nhi maaang skte..isliye hum uski cookie access krne ki koshish krte h
     //which has tokens to identify the user
     //now with verifyJWT in authmiddleware we got acccess to user
-    User.findByIdAndUpdate(req.user._id,{
-        $set:{
-            refreshToken : undefined,
+    await User.findByIdAndUpdate(req.user._id,{
+        $unset:{
+            refreshToken : 1, //this removes the field from document
         }
     },{
         new : true
