@@ -214,7 +214,7 @@ const changeCurrentPassword = asyncHandler( async(req,res) =>{
 const getCurrentUser = asyncHandler(async (req,res) => {
     return res
     .status(200)
-    .json(new ApiResponse(200, {req.user}, "Take the user"))
+    .json(new ApiResponse(200, req.user, "Take the user"))
 })
 //files update ka fn alg rakha karo
 const updateAccountDetails = asyncHandler(async(req,res) =>{
@@ -256,7 +256,7 @@ const updateUserAvatar = asyncHandler(async(req,res) => {
         {new : true}).select("-password")
     return res
     .status(200)
-    .json(new ApiResponse(200 , {avatar.url} , "Updated Avatar!"))
+    .json(new ApiResponse(200 , avatar.url , "Updated Avatar!"))
         
 })
 
@@ -283,6 +283,64 @@ const updateCoverImage = asyncHandler(async(req,res) => {
         
 })
 
+const getUserChannelProfile = asyncHandler(async(req,res) =>{
+    const {userName} = req.params
+    if(!userName){
+        throw new ApiError(400, "User not Found!")
+    }
+    const channel = await User.aggregate([{
+        $match : {userName : userName?.toLowerCase()}
+    },
+    {
+        $lookup : {
+            from : "subsciptions",
+            localField : "_id",
+            foreignField : "channel",
+            as : "subscribers"
+        }
+    },{
+
+        $lookup : {
+            from : "subscriptions",
+            localField : "_id",
+            foreignField = "subscriber",
+            as : "subscribedTo"
+        },
+    },{
+        $addFields : {
+            subscribersCount : {$size : "$subscribers"} ,
+            subscribedChannelCount : {$size : "$subscribedTo"},
+            isSubscribed : {
+                $cond : {
+                    if : {$in : [req.user?._id, "$subscribers.subscriber"]},
+                    then : true,
+                    else:false
+                }
+            }
+        }
+    },{
+        $project : {
+            fullName : 1,
+            userName : 1,
+            avatar : 1,
+            subscribedChannelCount : 1,
+            subscribersCount : 1,
+            coverImage : 1,
+
+        }
+    }])
+    if(!channel?.length){
+        throw new ApiError(404, "Channel not Found!")
+    }
+    return res.status(200)
+    .json(
+        new ApiResponse(200,channel[0],"channel details fetched" )
+    )
+})
+
+const getWatchHistory = asyncHandler(async(req,res) => {
+    
+})
 
 
 export 
@@ -294,5 +352,7 @@ changeCurrentPassword,
 getCurrentUser,
 updateAccountDetails,
 updateUserAvatar,
-updateCoverImage
+updateCoverImage,
+getUserChannelProfile,
+
 }
