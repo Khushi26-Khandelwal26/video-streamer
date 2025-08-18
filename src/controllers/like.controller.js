@@ -18,7 +18,9 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
     // if(!video){
     //     throw new ApiError(404, "Video doesn't exist")
     // }
-
+    if (!mongoose.Types.ObjectId.isValid(videoId)) {
+            throw new ApiError(400, "Invalid video ID");
+        }
 
 
     const existingLike = await Like.findOne({
@@ -56,6 +58,10 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     // if(!comment){
     //     throw new ApiError(404 ,"Comment doesn't exist")
     // }
+
+    if (!mongoose.Types.ObjectId.isValid(commentId)) {
+            throw new ApiError(400, "Invalid comment ID");
+        }
 
     const existingLike = await Like.findOne({
         comment: commentId,
